@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم إدارة الحجوزات | Masr Rehab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        if (sessionStorage.getItem("admin_access") !== "true") {
+            window.stop(); // إيقاف تحميل شجرة DOM تماماً
+            window.location.replace("admin.html");
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #1e5631;
+            --primary-light: #4c9a2a;
+            --ginger: #d4a373;
+            --bg-dashboard: #f0f4f1;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dashboard);
+            padding: 30px 20px;
+        }
+
+        .dashboard-header {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--white);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-header h1 {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .btn-logout {
+            background: #e63946;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9fbf9;
+        }
+
+        .patient-link {
+            color: var(--primary-light);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* شارات الحالة الملونة */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <h1>لوحة متابعة الحجوزات اللحظية (الولايات الإقليمية)</h1>
+        <button id="logoutBtn" class="btn-logout">تسجيل الخروج 🚪</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم المريض</th>
+                    <th>رقم الهاتف</th>
+                    <th>الفرع الدولي</th>
+                    <th>التخصص</th>
+                    <th>الموعد المفضل</th>
+                    <th>الحالة</th>
+                    <th>إجراءات إدارية</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentsTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // نفس تكوين البيانات لمزامنة قاعدة البيانات
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // مرجع استعلام كوليكشن المواعيد مرتبة تنازلياً حسب وقت الإدخال
+        const appointmentsRef = collection(db, "appointments");
+        const q = query(appointmentsRef, orderBy("createdAt", "desc"));
+
+        const tableBody = document.getElementById("appointmentsTableBody");
+
+        // الاستماع المباشر الفوري للبيانات (Real-Time Synchronizing)
+        onSnapshot(q, (snapshot) => {
+            tableBody.innerHTML = ""; // تصفية الجدول لإعادة الهيكلة الفورية دون تحديث
+
+            if(snapshot.empty) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#777;">لا توجد طلبات حجز مسجلة حالياً.</td></tr>`;
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const docId = docSnap.id;
+
+                const tr = document.createElement("tr");
+
+                // إعداد نص وعناصر الحالة ببطاقة ملونة
+                let statusText = data.status === "pending" ? "في الانتظار" : "تم التأكيد والموافقة";
+                let statusClass = data.status === "pending" ? "status-pending" : "status-approved";
+
+                tr.innerHTML = `
+                    <td><span class="patient-link" data-id="${docId}">${data.patientName}</span></td>
+                    <td>${data.patientPhone}</td>
+                    <td>${data.branch}</td>
+                    <td>${data.service}</td>
+                    <td>${data.prefDate} | ${data.prefTime}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td class="actions-cell">
+                        ${data.status === 'pending' ? `<button class="btn-action btn-approve" data-id="${docId}">✅ قبول</button>` : ''}
+                        <button class="btn-action btn-delete" data-id="${docId}">❌ حذف</button>
+                    </td>
+                `;
+
+                // تخزين البيانات كاملة بالـ Element لعرض الملاحظات في المودال/التنبيه
+                tr.querySelector('.patient-link').addEventListener('click', () => {
+                    alert(`📋 ملف المريض الكامل:\n\n` +
+                          `• الاسم: ${data.patientName}\n` +
+                          `• الهاتف: ${data.patientPhone}\n` +
+                          `• الإيميل: ${data.patientEmail || 'غير متوفر'}\n` +
+                          `• الفرع: ${data.branch}\n` +
+                          `• التخصص: ${data.service}\n` +
+                          `• الموعد: ${data.prefDate} الساعة ${data.prefTime}\n` +
+                          `• ملاحظات المريض: ${data.notes || 'لا توجد ملاحظات إضافية.'}`);
+                });
+
+                // تفعيل معالج زر القبول
+                if(data.status === 'pending') {
+                    tr.querySelector('.btn-approve').addEventListener('click', async () => {
+                        await approveAppointment(docId, data);
+                    });
+                }
+
+                // تفعيل معالج زر الحذف
+                tr.querySelector('.btn-delete').addEventListener('click', async () => {
+                    await deleteAppointment(docId);
+                });
+
+                tableBody.appendChild(tr);
+            });
+        });
+
+        // دالة تحديث الحالة وفتح الواتساب بنص مخصص ومصادق برابط URL بالكامل
+        async function approveAppointment(id, data) {
+            try {
+                const docRef = doc(db, "appointments", id);
+                await updateDoc(docRef, { status: "approved" });
+
+                // إنشاء رسالة مخصصة للمريض للـ WhatsApp
+                const msg = `مرحباً أ/ ${data.patientName}، يسعدنا في *مراكز مصر للتأهيل* تأكيد موعدك لتخصص (${data.service}) بفرع (${data.branch}) يوم ${data.prefDate} الساعة ${data.prefTime}. نتطلع لزيارتك وتمنياتنا لك بالشفاء العاجل.`;
+                const encodedMsg = encodeURIComponent(msg);
+                
+                // تنظيف رقم الهاتف إذا كان يحتوي على تداخلات
+                let phone = data.patientPhone.replace(/\s+/g, '');
+                
+                // فتح المحادثة الفورية مباشرة
+                window.open(`https://wa.me/${phone}?text=${encodedMsg}`, '_blank');
+            } catch (error) {
+                console.error("Error updating document: ", error);
+            }
+        }
+
+        // دالة الحذف النهائي بعد موافقة وتأكيد الآدمن
+        async function deleteAppointment(id) {
+            if(confirm("هل أنت متأكد تماماً من حذف هذا الحجز نهائياً من قاعدة البيانات؟ لا يمكن التراجع.")) {
+                try {
+                    await deleteDoc(doc(db, "appointments", id));
+                    alert("تم الحذف بنجاح.");
+                } catch (error) {
+                    console.error("Error deleting document: ", error);
+                }
+            }
+        }
+
+        // تسجيل الخروج وتنظيف الذاكرة
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            sessionStorage.clear();
+            window.location.replace("admin.html");
+        });
+    </script>
+</body>
+</html>
