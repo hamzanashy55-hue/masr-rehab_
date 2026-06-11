@@ -1,598 +1,425 @@
-<think>
-The user wants me to build a complete full-stack serverless website for "مراكز مصر للتأهيل | Masr Rehab" - a rehabilitation center specializing in physical therapy, pediatric rehab, and neurology.
-
-The system consists of 3 main files:
-1. **index.html** - Landing page for patients with booking form
-2. **admin.html** - Admin login page
-3. **dashboard.html** - Real-time admin dashboard
-
-Key requirements:
-- Full Arabic support with RTL direction
-- Medical color scheme (dark green, light green, beige)
-- Firebase Firestore as database
-- Glassmorphism effects
-- Real-time updates with onSnapshot
-- WhatsApp integration
-- 3D/hover effects
-
-Let me write all three files with clean, modern code:
-
-### File 1: index.html
-- Fixed nav with logo and smooth scroll
-- Hero section with stats
-- Services section with cards
-- Booking form with all fields
-- Firebase integration
-
-### File 2: admin.html
-- Glassmorphism login
-- Password check (hamza)
-- Session storage logic
-
-### File 3: dashboard.html
-- Security check in head
-- Real-time Firebase listener
-- Table with actions
-- WhatsApp integration
-- Delete functionality
-
-I'll write everything in proper Arabic with RTL, modern CSS, and proper Firebase v10+ module syntax.
-</think># 🏥 مراكز مصر للتأهيل | Masr Rehab
-## نظام إدارة المواعيد الطبي الذكي
-
-سأقوم بكتابة الأكواد الكاملة للأجزاء الثلاثة بنظام نظيف واحترافي يدعم العربية بالكامل ويتكامل مع Firebase Firestore.
-
----
-
-## 📁 الملف الأول: الصفحة الرئيسية للمرضى
-
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مراكز مصر للتأهيل | Masr Rehab - احجز موعدك</title>
-    <meta name="description" content="مراكز مصر للتأهيل - أفضل مراكز العلاج الطبيعي وتأهيل الأطفال والأعصاب في مصر وليبيا والجزائر والسعودية">
-    
-    <!-- الخطوط العربية -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- أيقونات Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>مراكز مصر للتأهيل | Masr Rehab - الرئيسية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ============================================
-           المتغيرات والتصميم الأساسي
-           ============================================ */
         :root {
-            --primary-dark: #1a5c38;
-            --primary: #2d6a4f;
-            --primary-light: #40916c;
-            --accent: #52b788;
-            --accent-light: #74c69d;
-            --beige: #f8f4f0;
-            --beige-dark: #e8e2dc;
+            --primary: #1e5631; /* أخضر غامق */
+            --primary-light: #4c9a2a; /* أخضر فاتح */
+            --ginger: #d4a373; /* لون الزنجبيل */
+            --bg-light: #f4f9f4;
+            --text-dark: #2b2d42;
             --white: #ffffff;
-            --text-dark: #143358;
-            --text-light: #52796f;
-            --shadow: 0 10px 40px rgba(45, 106, 79, 0.15);
-            --shadow-hover: 0 20px 60px rgba(45, 106, 79, 0.25);
-            --radius: 20px;
-            --radius-sm: 12px;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
             font-family: 'Cairo', sans-serif;
-            background: var(--beige);
-            color: var(--text-dark);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        html {
             scroll-behavior: smooth;
         }
 
-        /* ============================================
-           القائمة العلوية (Navbar)
-           ============================================ */
-        .navbar {
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* هيدر ثابت */
+        header {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            z-index: 1000;
+            width: 100%;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 15px 5%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .navbar.scrolled {
-            padding: 10px 5%;
-            box-shadow: var(--shadow);
+            padding: 15px 20px;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
             text-decoration: none;
         }
 
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .logo-text {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--primary-dark);
-            line-height: 1.2;
-        }
-
-        .logo-text span {
-            display: block;
-            font-size: 12px;
-            font-weight: 400;
-            color: var(--text-light);
+        .logo span {
+            color: var(--ginger);
         }
 
         .nav-links {
             display: flex;
-            align-items: center;
-            gap: 30px;
             list-style: none;
+            gap: 20px;
         }
 
         .nav-links a {
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 600;
-            font-size: 15px;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
+            transition: color 0.3s;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--primary-light);
         }
 
         .btn-book {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            padding: 12px 28px;
-            border-radius: 50px;
+            background: var(--primary);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 25px;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(45, 106, 79, 0.3);
+            font-weight: 600;
+            transition: background 0.3s;
         }
 
         .btn-book:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(45, 106, 79, 0.4);
+            background: var(--primary-light);
         }
 
-        /* Menu Mobile */
-        .menu-toggle {
-            display: none;
-            font-size: 24px;
-            color: var(--primary);
-            cursor: pointer;
-        }
-
-        /* ============================================
-           قسم الترحيب (Hero Section)
-           ============================================ */
+        /* قسم الأبطال Hero Section */
         .hero {
-            min-height: 100vh;
-            padding: 120px 5% 80px;
-            display: flex;
-            align-items: center;
+            margin-top: 80px;
+            padding: 100px 20px;
+            background: radial-gradient(circle at 10% 20%, rgba(76, 154, 42, 0.1) 0%, rgba(255, 255, 255, 1) 90%);
+            text-align: center;
             position: relative;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%);
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 80%;
-            height: 150%;
-            background: radial-gradient(ellipse, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: heroGlow 8s ease-in-out infinite;
-        }
-
-        @keyframes heroGlow {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.1); }
-        }
-
-        .hero-content {
-            max-width: 650px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 50px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .hero h1 {
-            font-size: clamp(36px, 5vw, 60px);
-            font-weight: 800;
-            color: white;
-            line-height: 1.2;
+            font-size: 42px;
+            color: var(--primary);
             margin-bottom: 20px;
-        }
-
-        .hero h1 span {
-            background: linear-gradient(135deg, #a8e6cf, #dcedc1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .hero p {
             font-size: 18px;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 35px;
-            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            color: #555;
         }
 
-        .hero-stats {
+        .stats {
             display: flex;
+            justify-content: center;
             gap: 40px;
             margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 36px;
-            font-weight: 800;
-            color: white;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-        }
-
-        /* ============================================
-           قسم الخدمات (Services Section)
-           ============================================ */
-        .services {
-            padding: 100px 5%;
             background: var(--white);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            min-width: 150px;
         }
 
-        .section-header {
-            text-align: center;
-            margin-bottom: 60px;
+        .stat-item h3 {
+            font-size: 28px;
+            color: var(--ginger);
         }
 
-        .section-header h2 {
-            font-size: clamp(28px, 4vw, 42px);
-            font-weight: 800;
-            color: var(--primary-dark);
-            margin-bottom: 15px;
-        }
-
-        .section-header p {
-            font-size: 16px;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+        /* قسم الخدمات */
+        .services {
+            padding: 80px 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        .service-card {
-            background: var(--beige);
-            padding: 40px 30px;
-            border-radius: var(--radius);
+        .section-title {
             text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid transparent;
-            opacity: 0;
-            transform: translateY(30px);
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 40px;
         }
 
-        .service-card.visible {
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .service-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .service-card.reveal {
             opacity: 1;
             transform: translateY(0);
+            transition: all 0.6s ease-out;
         }
 
         .service-card:hover {
             transform: translateY(-10px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--accent-light);
-            background: var(--white);
-        }
-
-        .service-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 32px;
-            color: white;
-            transition: transform 0.3s ease;
-        }
-
-        .service-card:hover .service-icon {
-            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 25px rgba(30, 86, 49, 0.15);
         }
 
         .service-card h3 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 12px;
+            color: var(--primary);
+            margin-bottom: 15px;
         }
 
-        .service-card p {
-            font-size: 14px;
-            color: var(--text-light);
-            line-height: 1.7;
-        }
-
-        /* ============================================
-           نموذج الحجز (Booking Form)
-           ============================================ */
-        .booking {
-            padding: 100px 5%;
-            background: linear-gradient(180deg, var(--beige) 0%, var(--beige-dark) 100%);
+        /* قسم الحجز */
+        .booking-section {
+            padding: 80px 20px;
+            background: #eef5ee;
         }
 
         .booking-container {
             max-width: 700px;
             margin: 0 auto;
             background: var(--white);
-            padding: 50px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .booking-form {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         .form-group {
-            position: relative;
-        }
-
-        .form-group.full-width {
-            grid-column: span 2;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-dark);
             margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
         }
 
-        .form-group label .required {
-            color: #e74c3c;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-control {
             width: 100%;
-            padding: 15px 20px;
-            border: 2px solid var(--beige-dark);
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-family: 'Cairo', sans-serif;
-            transition: all 0.3s ease;
-            background: var(--white);
-            color: var(--text-dark);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
+            transition: border-color 0.3s;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .form-control:focus {
+            border-color: var(--primary-light);
         }
 
-        .form-group select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2314358' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 15px center;
-            padding-left: 45px;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         .btn-submit {
-            grid-column: span 2;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            padding: 18px 40px;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: var(--white);
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 8px;
             font-size: 18px;
             font-weight: 700;
-            font-family: 'Cairo', sans-serif;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(45, 106, 79, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            transition: background 0.3s;
         }
 
         .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(45, 106, 79, 0.4);
+            background: var(--primary-light);
         }
+    </style>
+</head>
+<body>
 
-        .btn-submit:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">مصر<span> للتأهيل</span></a>
+            <ul class="nav-links">
+                <li><a href="#">الرئيسية</a></li>
+                <li><a href="#services">خدماتنا</a></li>
+                <li><a href="#booking">احجز موعداً</a></li>
+            </ul>
+            <a href="#booking" class="btn-book">احجز الآن</a>
+        </div>
+    </header>
 
-        .btn-submit i {
-            font-size: 20px;
-        }
+    <section class="hero">
+        <h1>مراكز مصر للتأهيل وعلاج الأعصاب</h1>
+        <p>نحن ملتزمون بتقديم أفضل برامج التأهيل الطبي المتقدمة للأطفال والبالغين بأحدث المعايير العالمية.</p>
+        <div class="stats">
+            <div class="stat-item">
+                <h3>+1000</h3>
+                <p>حالة ممتثلة للشفاء</p>
+            </div>
+            <div class="stat-item">
+                <h3>4 دول</h3>
+                <p>تواجدنا الإقليمي</p>
+            </div>
+        </div>
+    </section>
 
-        /* ============================================
-           التذييل (Footer)
-           ============================================ */
-        .footer {
-            background: var(--primary-dark);
-            color: white;
-            padding: 60px 5% 30px;
-        }
+    <section id="services" class="services">
+        <h2 class="section-title">تخصصاتنا العلاجية</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>تأهيل الأعصاب</h3>
+                <p>برامج متكاملة لمرضى السكتات الدماغية واضطرابات الجهاز العصبي.</p>
+            </div>
+            <div class="service-card">
+                <h3>تأهيل الأطفال</h3>
+                <p>علاج حالات الشلل الدماغي، وتأخر النمو الحركي عند الأطفال.</p>
+            </div>
+            <div class="service-card">
+                <h3>علاج النطق والكلام</h3>
+                <p>جلسات تخاطب مكثفة لمعالجة مشاكل النطق والبلع.</p>
+            </div>
+        </div>
+    </section>
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto 40px;
-        }
+    <section id="booking" class="booking-section">
+        <div class="booking-container">
+            <h2 class="section-title" style="margin-bottom: 20px;">طلب حجز موعد جديد</h2>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label>اسم المريض بالكامل *</label>
+                    <input type="text" id="patientName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف المحمول *</label>
+                    <input type="tel" id="patientPhone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني (اختياري)</label>
+                    <input type="email" id="patientEmail" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>الفرع المطلوب *</label>
+                    <select id="branch" class="form-control" required>
+                        <option value="">اختر الفرع...</option>
+                        <option value="مصر: أكتوبر الحصري">مصر: أكتوبر الحصري</option>
+                        <option value="مصر: حدائق أكتوبر">مصر: حدائق أكتوبر</option>
+                        <option value="ليبيا: غريان">ليبيا: غريان</option>
+                        <option value="الجزائر: واد سوف">الجزائر: واد سوف</option>
+                        <option value="الجزائر: قسنطينة">الجزائر: قسنطينة</option>
+                        <option value="الجزائر: وهران">الجزائر: وهران</option>
+                        <option value="السعودية: الدمام">السعودية: الدمام</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>التخصص المطلوب *</label>
+                    <select id="service" class="form-control" required>
+                        <option value="">اختر التخصص...</option>
+                        <option value="تأهيل أعصاب">تأهيل أعصاب</option>
+                        <option value="تأهيل أطفال">تأهيل أطفال</option>
+                        <option value="تخاطب ونطق">تخاطب ونطق</option>
+                        <option value="علاج طبيعي عام">علاج طبيعي عام</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>التاريخ المفصل *</label>
+                        <input type="date" id="prefDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الوقت المناسب *</label>
+                        <input type="time" id="prefTime" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات إضافية</label>
+                    <textarea id="notes" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">تأكيد الحجز اللحظي</button>
+            </form>
+        </div>
+    </section>
 
-        .footer-section h4 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--accent-light);
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        .footer-section p,
-        .footer-section a {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
-            transition: color 0.3s ease;
-        }
+        // تكوين Firebase الخاص بك (استبدل بالبيانات الخاصة بمشروعك)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        .footer-section a:hover {
-            color: var(--accent-light);
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-        }
+        // تأثير التمرير الانسيابي والظهور للبطاقات (Scroll Reveal)
+        const cards = document.querySelectorAll('.service-card');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('reveal');
+                }
+            });
+        }, { threshold: 0.1 });
 
-        /* ============================================
-           الاستجابة للموبايل
-           ============================================ */
-        @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
+        cards.forEach(card => observer.observe(card));
+
+        // معالجة إرسال النموذج وحفظ البيانات في الـ Firestore
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const patientName = document.getElementById('patientName').value.trim();
+            const patientPhone = document.getElementById('patientPhone').value.trim();
+            const patientEmail = document.getElementById('patientEmail').value.trim();
+            const branch = document.getElementById('branch').value;
+            const service = document.getElementById('service').value;
+            const prefDate = document.getElementById('prefDate').value;
+            const prefTime = document.getElementById('prefTime').value;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!patientName || !patientPhone || !branch || !service || !prefDate || !prefTime) {
+                alert('يرجى ملء الحقول الإجبارية المميزة بنجمة (*)');
+                return;
             }
 
-            .nav-links {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                right: 0;
-                background: white;
-                flex-direction: column;
-                padding: 30px;
-                gap: 20px;
-                box-shadow: var(--shadow);
-                transform: translateY(-150%);
-                transition: transform 0.3s ease;
-            }
+            try {
+                await addDoc(collection(db, "appointments"), {
+                    patientName,
+                    patientPhone,
+                    patientEmail,
+                    branch,
+                    service,
+                    prefDate,
+                    prefTime,
+                    notes,
+                    status: "pending",
+                    createdAt: serverTimestamp()
+                });
 
-            .nav-links.active {
-                transform: translateY(0);
+                alert('تم تسجيل حجزك بنجاح! سيتواصل معك فريق التأهيل قريباً لتأكيد الموعد.');
+                document.getElementById('appointmentForm').reset();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert('عذراً، حدث خطأ أثناء إرسال البيانات. يرجى المحاولة لاحقاً.');
             }
-
-            .hero {
-                padding: 100px 5% 60px;
-            }
-
-            .hero-stats {
-                flex-wrap: wrap;
-                gap:
+        });
+    </script>
+</body>
+</html>
