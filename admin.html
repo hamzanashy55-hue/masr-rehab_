@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراكز مصر للتأهيل | تسجيل دخول الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1e5631;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            /* خلفية ذات طبقة خضراء مريحة وعصرية */
+            background: linear-gradient(rgba(30, 86, 49, 0.75), rgba(30, 86, 49, 0.85)), 
+                        url('https://img.freepik.com/free-photo/abstract-blur-medical-clinic-hospital-interior_74190-4491.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* تأثير الزجاج البلوري Glassmorphism */
+        .login-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: var(--white);
+        }
+
+        .login-card h2 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-card p {
+            font-size: 14px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #333;
+            outline: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #d4a373; /* لون زنجبيلي مميز للزر */
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 15px rgba(212, 163, 115, 0.4);
+        }
+
+        .btn-login:hover {
+            background: #c39262;
+        }
+
+        .error-msg {
+            color: #ff8585;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>بوابة الإدارة الإلكترونية</h2>
+        <p>مراكز مصر للتأهيل وعلاج الأعصاب</p>
+        
+        <div class="form-group">
+            <label>رمز المرور المشفر للدخول</label>
+            <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        
+        <button id="loginBtn" class="btn-login">تسجيل الدخول الآمن</button>
+        <div id="errorBox" class="error-msg">رمز المرور غير صحيح! يرجى المحاولة مجدداً.</div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('adminPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorBox = document.getElementById('errorBox');
+
+        function handleLogin() {
+            const password = passwordInput.value;
+            
+            // التحقق البرمجي المطلوب
+            if(password === "همزة") {
+                sessionStorage.setItem("admin_access", "true");
+                window.location.href = "dashboard.html";
+            } else {
+                errorBox.style.display = "block";
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+        }
+
+        loginBtn.addEventListener('click', handleLogin);
+
+        // دعم تسجيل الدخول بالضغط على زر Enter من الكيبورد
+        passwordInput.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    </script>
+</body>
+</html>
